@@ -35,5 +35,10 @@ namespace Einkaufsliste
             mediaElement.SetSource(stream, stream.ContentType);
             mediaElement.Play();
         }
+
+        private void HamburgerButton_Click(object sender, RoutedEventArgs e)
+        {
+            SplitView.IsPaneOpen = !SplitView.IsPaneOpen;
+        }
     }
 }
