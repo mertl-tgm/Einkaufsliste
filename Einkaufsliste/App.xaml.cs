@@ -111,42 +111,6 @@ namespace Einkaufsliste
 
             // Get the database (and create it if it doesn't exist)
             this.database = new Database("einkaufsliste");
-            // Create a new document (i.e. a record) in the database
-            string id = null;
-            using (var mutableDoc = new MutableDocument())
-            {
-                mutableDoc.SetFloat("version", 2.0f)
-                    .SetString("type", "SDK");
-
-                // Save it to the database
-                this.database.Save(mutableDoc);
-                id = mutableDoc.Id;
-            }
-
-            // Update a document
-            using (var doc = this.database.GetDocument(id))
-            using (var mutableDoc = doc.ToMutable())
-            {
-                mutableDoc.SetString("language", "C#");
-                this.database.Save(mutableDoc);
-
-                using (var docAgain = this.database.GetDocument(id))
-                {
-                    System.Diagnostics.Debug.WriteLine($"Document ID :: {docAgain.Id}");
-                    System.Diagnostics.Debug.WriteLine($"Learning {docAgain.GetString("language")}");
-                }
-            }
-
-            // Create a query to fetch documents of type SDK
-            // i.e. SELECT * FROM database WHERE type = "SDK"
-            using (var query = QueryBuilder.Select(SelectResult.All())
-                .From(DataSource.Database(this.database))
-                .Where(Expression.Property("type").EqualTo(Expression.String("SDK"))))
-            {
-                // Run the query
-                var result = query.Execute();
-                System.Diagnostics.Debug.WriteLine($"Number of rows :: {result.Count()}");
-            }
 
             // Create replicator to push and pull changes to and from the cloud
             var targetEndpoint = new URLEndpoint(new Uri("ws://37.252.185.24:4984/db"));
@@ -156,11 +120,10 @@ namespace Einkaufsliste
             };
             replConfig.Channels = new List<String>();
             replConfig.Channels.Add("liste");
-
+            replConfig.Continuous = true;
 
             // Add authentication
             replConfig.Authenticator = new BasicAuthenticator("UserEin", "Einkaufsliste");
-            replConfig.Continuous = true;
 
             // Create replicator
             var replicator = new Replicator(replConfig);
@@ -177,7 +140,15 @@ namespace Einkaufsliste
                 {
                     // Run the query
                     var result = query.Execute();
-                    System.Diagnostics.Debug.WriteLine($"Number of rows :: {result.Count()}");
+                    var res = result.ToArray();
+                    foreach (var i in res)
+                    {
+                        System.Diagnostics.Debug.WriteLine("Output " + Newtonsoft.Json.JsonConvert.SerializeObject(i));
+                        System.Diagnostics.Debug.WriteLine("Output " + i.GetDictionary(0).GetString("name"));
+                    }
+
+                    result = query.Execute();
+                    System.Diagnostics.Debug.WriteLine("Number " + result.Count());
                 }
             });
 
@@ -186,6 +157,8 @@ namespace Einkaufsliste
                 System.Diagnostics.Debug.WriteLine("Changed local db");
             });
             replicator.Start();
+
+            
         }
 
         public void AddItem(string name, String value)
