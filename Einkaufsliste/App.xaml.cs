@@ -160,6 +160,7 @@ namespace Einkaufsliste
 
             // Add authentication
             replConfig.Authenticator = new BasicAuthenticator("UserEin", "Einkaufsliste");
+            replConfig.Continuous = true;
 
             // Create replicator
             var replicator = new Replicator(replConfig);
@@ -170,6 +171,14 @@ namespace Einkaufsliste
                     System.Diagnostics.Debug.WriteLine($"Error :: {args.Status.Error}");
                 }
                 System.Diagnostics.Debug.WriteLine("Test sync");
+
+                using (var query = QueryBuilder.Select(SelectResult.All())
+                .From(DataSource.Database(this.database)))
+                {
+                    // Run the query
+                    var result = query.Execute();
+                    System.Diagnostics.Debug.WriteLine($"Number of rows :: {result.Count()}");
+                }
             });
 
             this.database.AddChangeListener((sender, args) =>
