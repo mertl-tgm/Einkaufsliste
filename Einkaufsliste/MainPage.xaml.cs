@@ -45,5 +45,10 @@ namespace Einkaufsliste
         {
             //SplitView.IsPaneOpen = !SplitView.IsPaneOpen;
         }
+
+        private void Button_Click_1(object sender, RoutedEventArgs e)
+        {
+            this.param.App.AddItem("Apfel", "1");
+        }
     }
 }

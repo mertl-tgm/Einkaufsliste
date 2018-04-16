@@ -40,7 +40,8 @@
                 </Grid.ColumnDefinitions>
                 <TextBlock Text="Column 1 sizes to its conent." FontSize="24" Margin="0,0,43,0"/>
 
-                <Button x:Name="button" Content="Test Button" HorizontalAlignment="Left" Margin="144,511,0,0" VerticalAlignment="Center" Click="Button_Click" RenderTransformOrigin="0.5,0.5"/>
+                <Button x:Name="button" Content="Test Button" HorizontalAlignment="Left" Margin="182,561,-277,47" VerticalAlignment="Center" Click="Button_Click" RenderTransformOrigin="0.5,0.5" Grid.ColumnSpan="4"/>
+                <Button Content="Add Item" Grid.ColumnSpan="4" HorizontalAlignment="Left" Margin="42,561,-107,0" VerticalAlignment="Top" Click="Button_Click_1"/>
 
             </Grid>
         </SplitView.Content>

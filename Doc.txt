@@ -25,7 +25,10 @@ install sync gateway
             "bucket": "einkaufsliste",
 			"username": "UserEin",
 			"password": "Einkaufsliste",
-            "users": { "UserEin": { "disabled": false, "admin_channels": ["*"], "password": "Einkaufsliste" } }
+            "users": { "UserEin": { "disabled": false, "admin_channels": ["*"], "password": "Einkaufsliste" } },
+			"sync": `function(doc) {
+				channel("liste");
+			}`
         }
     }
 }

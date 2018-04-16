@@ -17,6 +17,7 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
+using System.Collections;
 
 namespace Einkaufsliste
 {
@@ -25,6 +26,8 @@ namespace Einkaufsliste
     /// </summary>
     public sealed partial class App : Application
     {
+        private Database database;
+
         /// <summary>
         /// Initialisiert das Singletonanwendungsobjekt. Dies ist die erste Zeile von erstelltem Code
         /// und daher das logische Äquivalent von main() bzw. WinMain().
@@ -107,7 +110,7 @@ namespace Einkaufsliste
             Couchbase.Lite.Support.UWP.Activate();
 
             // Get the database (and create it if it doesn't exist)
-            var database = new Database("einkaufsliste");
+            this.database = new Database("einkaufsliste");
             // Create a new document (i.e. a record) in the database
             string id = null;
             using (var mutableDoc = new MutableDocument())
@@ -116,18 +119,18 @@ namespace Einkaufsliste
                     .SetString("type", "SDK");
 
                 // Save it to the database
-                database.Save(mutableDoc);
+                this.database.Save(mutableDoc);
                 id = mutableDoc.Id;
             }
 
             // Update a document
-            using (var doc = database.GetDocument(id))
+            using (var doc = this.database.GetDocument(id))
             using (var mutableDoc = doc.ToMutable())
             {
                 mutableDoc.SetString("language", "C#");
-                database.Save(mutableDoc);
+                this.database.Save(mutableDoc);
 
-                using (var docAgain = database.GetDocument(id))
+                using (var docAgain = this.database.GetDocument(id))
                 {
                     System.Diagnostics.Debug.WriteLine($"Document ID :: {docAgain.Id}");
                     System.Diagnostics.Debug.WriteLine($"Learning {docAgain.GetString("language")}");
@@ -137,7 +140,7 @@ namespace Einkaufsliste
             // Create a query to fetch documents of type SDK
             // i.e. SELECT * FROM database WHERE type = "SDK"
             using (var query = QueryBuilder.Select(SelectResult.All())
-                .From(DataSource.Database(database))
+                .From(DataSource.Database(this.database))
                 .Where(Expression.Property("type").EqualTo(Expression.String("SDK"))))
             {
                 // Run the query
@@ -147,7 +150,13 @@ namespace Einkaufsliste
 
             // Create replicator to push and pull changes to and from the cloud
             var targetEndpoint = new URLEndpoint(new Uri("ws://37.252.185.24:4984/db"));
-            var replConfig = new ReplicatorConfiguration(database, targetEndpoint);
+            var replConfig = new ReplicatorConfiguration(this.database, targetEndpoint)
+            {
+                ReplicatorType = ReplicatorType.PushAndPull
+            };
+            replConfig.Channels = new List<String>();
+            replConfig.Channels.Add("liste");
+
 
             // Add authentication
             replConfig.Authenticator = new BasicAuthenticator("UserEin", "Einkaufsliste");
@@ -160,9 +169,25 @@ namespace Einkaufsliste
                 {
                     System.Diagnostics.Debug.WriteLine($"Error :: {args.Status.Error}");
                 }
+                System.Diagnostics.Debug.WriteLine("Test sync");
             });
 
+            this.database.AddChangeListener((sender, args) =>
+            {
+                System.Diagnostics.Debug.WriteLine("Changed local db");
+            });
             replicator.Start();
+        }
+
+        public void AddItem(string name, String value)
+        {
+            using (var mutableDoc = new MutableDocument())
+            {
+                mutableDoc.SetString("name", name).SetString("value", value);
+
+                // Save it to the database
+                this.database.Save(mutableDoc);
+            }
         }
     }
 
