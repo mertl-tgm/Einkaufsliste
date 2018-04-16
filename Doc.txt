@@ -1,0 +1,31 @@
+install couchbase
+
+	apt install ./couchbase-server-enterprise_5.1.0-ubuntu16.04_amd64.deb
+	
+install sync gateway
+	
+	apt install ./couchbase-sync-gateway-enterprise_2.0.0_x86_64.deb
+	
+	systemctl start sync_gateway
+
+	
+	https://developer.couchbase.com/documentation/mobile/current/installation/sync-gateway/index.html
+	
+	/opt/couchbase-sync-gateway/bin/sync_gateway /sync-gateway-config.json
+	
+	 systemctl status sync_gateway
+	 
+	 
+	 
+{
+    "log": ["*"],
+    "databases": {
+        "db": {
+            "server": "http://localhost:8091",
+            "bucket": "einkaufsliste",
+			"username": "UserEin",
+			"password": "Einkaufsliste",
+            "users": { "UserEin": { "disabled": false, "admin_channels": ["*"], "password": "Einkaufsliste" } }
+        }
+    }
+}

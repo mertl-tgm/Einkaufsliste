@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Couchbase.Lite;
+using Couchbase.Lite.Query;
+using Couchbase.Lite.Sync;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -20,7 +23,7 @@ namespace Einkaufsliste
     /// <summary>
     /// Stellt das anwendungsspezifische Verhalten bereit, um die Standardanwendungsklasse zu ergänzen.
     /// </summary>
-    sealed partial class App : Application
+    public sealed partial class App : Application
     {
         /// <summary>
         /// Initialisiert das Singletonanwendungsobjekt. Dies ist die erste Zeile von erstelltem Code
@@ -66,7 +69,9 @@ namespace Einkaufsliste
                     // Wenn der Navigationsstapel nicht wiederhergestellt wird, zur ersten Seite navigieren
                     // und die neue Seite konfigurieren, indem die erforderlichen Informationen als Navigationsparameter
                     // übergeben werden
-                    rootFrame.Navigate(typeof(MainPage), e.Arguments);
+                    Param param = new Param();
+                    param.App = this;
+                    rootFrame.Navigate(typeof(MainPage), param);
                 }
                 // Sicherstellen, dass das aktuelle Fenster aktiv ist
                 Window.Current.Activate();
@@ -96,5 +101,74 @@ namespace Einkaufsliste
             //TODO: Anwendungszustand speichern und alle Hintergrundaktivitäten beenden
             deferral.Complete();
         }
+
+        public void TestDB()
+        {
+            Couchbase.Lite.Support.UWP.Activate();
+
+            // Get the database (and create it if it doesn't exist)
+            var database = new Database("einkaufsliste");
+            // Create a new document (i.e. a record) in the database
+            string id = null;
+            using (var mutableDoc = new MutableDocument())
+            {
+                mutableDoc.SetFloat("version", 2.0f)
+                    .SetString("type", "SDK");
+
+                // Save it to the database
+                database.Save(mutableDoc);
+                id = mutableDoc.Id;
+            }
+
+            // Update a document
+            using (var doc = database.GetDocument(id))
+            using (var mutableDoc = doc.ToMutable())
+            {
+                mutableDoc.SetString("language", "C#");
+                database.Save(mutableDoc);
+
+                using (var docAgain = database.GetDocument(id))
+                {
+                    System.Diagnostics.Debug.WriteLine($"Document ID :: {docAgain.Id}");
+                    System.Diagnostics.Debug.WriteLine($"Learning {docAgain.GetString("language")}");
+                }
+            }
+
+            // Create a query to fetch documents of type SDK
+            // i.e. SELECT * FROM database WHERE type = "SDK"
+            using (var query = QueryBuilder.Select(SelectResult.All())
+                .From(DataSource.Database(database))
+                .Where(Expression.Property("type").EqualTo(Expression.String("SDK"))))
+            {
+                // Run the query
+                var result = query.Execute();
+                System.Diagnostics.Debug.WriteLine($"Number of rows :: {result.Count()}");
+            }
+
+            // Create replicator to push and pull changes to and from the cloud
+            var targetEndpoint = new URLEndpoint(new Uri("ws://37.252.185.24:4984/db"));
+            var replConfig = new ReplicatorConfiguration(database, targetEndpoint);
+
+            // Add authentication
+            replConfig.Authenticator = new BasicAuthenticator("UserEin", "Einkaufsliste");
+
+            // Create replicator
+            var replicator = new Replicator(replConfig);
+            replicator.AddChangeListener((sender, args) =>
+            {
+                if (args.Status.Error != null)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Error :: {args.Status.Error}");
+                }
+            });
+
+            replicator.Start();
+        }
+    }
+
+    public class Param
+    {
+        public App App { get; set; }
+        public string Text { get; set; }
     }
 }

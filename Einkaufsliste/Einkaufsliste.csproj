@@ -127,8 +127,20 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Couchbase.Lite.Enterprise">
+      <Version>2.0.0.1</Version>
+    </PackageReference>
+    <PackageReference Include="Couchbase.Lite.Enterprise.Support.UWP">
+      <Version>2.0.0.1</Version>
+    </PackageReference>
     <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform">
       <Version>6.0.8</Version>
+    </PackageReference>
+    <PackageReference Include="Newtonsoft.Json">
+      <Version>11.0.2</Version>
+    </PackageReference>
+    <PackageReference Include="SimpleInjector">
+      <Version>4.2.1</Version>
     </PackageReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">

@@ -22,23 +22,28 @@ namespace Einkaufsliste
     /// </summary>
     public sealed partial class MainPage : Page
     {
+        private Param param;
+
         public MainPage()
         {
-            this.InitializeComponent();
+            this.InitializeComponent(); 
         }
 
-        private async void Button_Click(object sender, RoutedEventArgs e)
+        protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            MediaElement mediaElement = new MediaElement();
-            var synth = new Windows.Media.SpeechSynthesis.SpeechSynthesizer();
-            Windows.Media.SpeechSynthesis.SpeechSynthesisStream stream = await synth.SynthesizeTextToStreamAsync("Hello, World!");
-            mediaElement.SetSource(stream, stream.ContentType);
-            mediaElement.Play();
+            base.OnNavigatedTo(e);
+
+            this.param = (Param)e.Parameter;
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            this.param.App.TestDB();
         }
 
         private void HamburgerButton_Click(object sender, RoutedEventArgs e)
         {
-            SplitView.IsPaneOpen = !SplitView.IsPaneOpen;
+            //SplitView.IsPaneOpen = !SplitView.IsPaneOpen;
         }
     }
 }
