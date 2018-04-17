@@ -19,25 +19,15 @@
         </DataTemplate>
     </Page.Resources>
 
-    <SplitView x:Name="MySplitView" DisplayMode="CompactOverlay"  IsPaneOpen="False" ScrollViewer.VerticalScrollBarVisibility="Visible"
+    <SplitView x:Name="SplitView" DisplayMode="CompactOverlay"  IsPaneOpen="False" ScrollViewer.VerticalScrollBarVisibility="Visible"
                CompactPaneLength="50" OpenPaneLength="160" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <SplitView.Pane>
             <StackPanel Background="Gray">
                 <Button x:Name="HamburgerButton" FontFamily="Segoe MDL2 Assets" Content="&#xE700;"
                     Width="50" Height="50" Background="Transparent" Click="HamburgerButton_Click"/>
                 <StackPanel Orientation="Horizontal">
-                    <Button x:Name="MenuButton1" FontFamily="Segoe MDL2 Assets" Content="&#xE1E2;"
-                    Width="50" Height="50" Background="Transparent" Tag="MenuButton1"/>
-                    <TextBlock Text="Registrierung" FontSize="18" VerticalAlignment="Center" />
-                </StackPanel>
-                <StackPanel Orientation="Horizontal">
-                    <Button x:Name="MenuButton2" FontFamily="Segoe MDL2 Assets" Content="&#xE10F;"
-                        Width="50" Height="50" Background="Transparent" />
-                    <TextBlock Text="Login" FontSize="18" VerticalAlignment="Center" />
-                </StackPanel>
-                <StackPanel Orientation="Horizontal">
                     <Button x:Name="MenuButton3" FontFamily="Segoe MDL2 Assets" Content="&#xE10A;"
-                        Width="50" Height="50" Background="Transparent" />
+                        Width="50" Height="50" Background="Transparent" Click="Button_Click_Exit" />
                     <TextBlock Text="Beenden" FontSize="18" VerticalAlignment="Center" />
                 </StackPanel>
             </StackPanel>
@@ -56,21 +46,28 @@
                 <TextBlock Grid.Row="0" Grid.Column="0" Foreground="Black" FontSize="25" Text="Einkaufsliste" 
                            Margin="10,0" Height="50" TextWrapping="Wrap" />
 
-                <ListView Grid.Row="1" Grid.Column="0" ItemsSource="{x:Bind ViewModel.Items}" SelectionChanged="ListView_OnSelectionChanged">
+                <ListView x:Name="MyListView" Grid.Row="1" Grid.Column="0" ItemsSource="{x:Bind ViewModel.Items}" SelectionChanged="ListView_OnSelectionChanged" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="ListViewItem">
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch"></Setter>
+                        </Style>
+                    </ListView.ItemContainerStyle>
                     <ListView.ItemTemplate>
                         <DataTemplate x:DataType="Einkaufsliste:Item">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="50"/>
                                 </Grid.ColumnDefinitions>
                                 <Grid.RowDefinitions>
-                                    <RowDefinition Height="25"/>
+                                    <RowDefinition Height="50"/>
                                 </Grid.RowDefinitions>
 
-                                <TextBlock Grid.Column="0" Text="{x:Bind Name}"/>
-                                <TextBlock Grid.Column="1" Text="{x:Bind Value}" x:Phase="1"/>
+                                <TextBlock Grid.Column="0" Text="{x:Bind Name}" Height="50" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="1" Text="{x:Bind Value}" x:Phase="1" Height="50" VerticalAlignment="Center"/>
+                                <Button Grid.Column="2" x:Name="delete" FontFamily="Segoe MDL2 Assets" DataContext="{x:Bind ID}" Content="&#xE10A;" Click="Button_Click_Delete" />
+
                             </Grid>
                         </DataTemplate>
                     </ListView.ItemTemplate>
@@ -107,9 +104,9 @@
                                 <RowDefinition Height="50"/>
                             </Grid.RowDefinitions>
 
-                            <Button Grid.Row="0" Grid.Column="0" Content="Hinzufügen" Click="Button_Click_1" Margin="10,0"/>
-                            <Button Grid.Row="0" Grid.Column="1" Content="Bearbeiten" Click="Button_Click_2" Margin="10,0"/>
-                            <Button Grid.Row="0" Grid.Column="2" Content="Entfernen" Click="Button_Click_3" Margin="10,0"/>
+                            <Button Grid.Row="0" Grid.Column="0" x:Name="addButton" Content="Hinzufügen" Click="Button_Click_Add" Margin="10,0" IsEnabled="True"/>
+                            <Button Grid.Row="0" Grid.Column="1" x:Name="editButton" Content="Bearbeiten" Click="Button_Click_Edit" Margin="10,0"/>
+                            <Button Grid.Row="0" Grid.Column="2" x:Name="saveButton" Content="Speichern" Click="Button_Click_Save" Margin="10,0" IsEnabled="False"/>
                         </Grid>
                     </Grid>
                 </Grid>

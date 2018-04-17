@@ -1,4 +1,5 @@
-﻿using Couchbase.Lite.Query;
+﻿using Couchbase.Lite;
+using Couchbase.Lite.Query;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -8,6 +9,7 @@ using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI.Core;
+using Windows.UI.Popups;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -26,6 +28,8 @@ namespace Einkaufsliste
     public sealed partial class MainPage : Page
     {
         private Param param;
+        private Item selectedItem;
+        private String id;
 
         public MainPage()
         {
@@ -43,35 +47,98 @@ namespace Einkaufsliste
             {
                 System.Diagnostics.Debug.WriteLine("Changed local db");
                 this.ViewModel.UpdateAll();
+
+                this.UpdateItems();
+                
+            });
+        }
+
+        public async void UpdateItems()
+        {
+            await Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+            {
+                MyListView.ItemsSource = null;
+                MyListView.ItemsSource = this.ViewModel.Items;
             });
         }
 
         private void HamburgerButton_Click(object sender, RoutedEventArgs e)
         {
-            //SplitView.IsPaneOpen = !SplitView.IsPaneOpen;
+            SplitView.IsPaneOpen = !SplitView.IsPaneOpen;
         }
 
-        private void Button_Click_1(object sender, RoutedEventArgs e)
+        private void Button_Click_Exit(object sender, RoutedEventArgs e)
         {
-            this.param.App.AddItem("Banane", "1");
+            Application.Current.Exit();
+        }
+
+        private async void Button_Click_Add(object sender, RoutedEventArgs e)
+        {
+            if (this.name.Text.Equals("")||this.value.Text.Equals(""))
+            {
+                var dialog = new MessageDialog("Name bzw. Einheit darf nicht leer sein.");
+                await dialog.ShowAsync();
+                return;
+            }
+            this.param.App.AddItem(this.name.Text, this.value.Text);
+            this.name.Text = "";
+            this.value.Text = "";
         }
         
-        private void Button_Click_2(object sender, RoutedEventArgs e)
+        private void Button_Click_Edit(object sender, RoutedEventArgs e)
         {
+            if (this.selectedItem == null) return;
+            this.name.Text = this.selectedItem.Name;
+            this.value.Text = this.selectedItem.Value;
+            this.id = this.selectedItem.ID;
 
+            this.ViewModel.Items.Remove(this.selectedItem);
+
+            this.addButton.IsEnabled = false;
+            this.editButton.IsEnabled = false;
+            this.saveButton.IsEnabled = true;
         }
 
-        private void Button_Click_3(object sender, RoutedEventArgs e)
+        private async void Button_Click_Save(object sender, RoutedEventArgs e)
         {
+            if (this.name.Text.Equals("") || this.value.Text.Equals(""))
+            {
+                var dialog = new MessageDialog("Name bzw. Einheit darf nicht leer sein.");
+                await dialog.ShowAsync();
+                return;
+            }
 
+            using (var doc = this.param.App.database.GetDocument(this.id))
+            using (var mutableDoc = doc.ToMutable())
+            {
+                mutableDoc.SetString("name", this.name.Text);
+                mutableDoc.SetString("value", this.value.Text);
+                this.param.App.database.Save(mutableDoc);
+            }
+            this.id = "";
+            this.selectedItem = null;
+            this.name.Text = "";
+            this.value.Text = "";
+
+            this.addButton.IsEnabled = true;
+            this.editButton.IsEnabled = true;
+            this.saveButton.IsEnabled = false;
+        }
+
+        private void Button_Click_Delete(object sender, RoutedEventArgs e)
+        {
+            Windows.UI.Xaml.Controls.Button button = (Windows.UI.Xaml.Controls.Button)sender;
+            System.Diagnostics.Debug.WriteLine("delete" + button.DataContext);
+            if (button.DataContext == null) return;
+            Document doc = this.param.App.database.GetDocument((string) button.DataContext);
+            this.param.App.database.Delete(doc);
+            
         }
 
         private void ListView_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            System.Diagnostics.Debug.WriteLine("Test");
-            //var item = e.AddedItems?.FirstOrDefault();
-            // edit: also get container
-            //var container = ((ListViewItem)(listView.ContainerFromItem(item)));
+            this.selectedItem = (Item) e.AddedItems?.FirstOrDefault();
+            if (this.selectedItem == null) return;
         }
 
         public ItemViewModel ViewModel { get; set; }
@@ -90,7 +157,6 @@ namespace Einkaufsliste
             using (var query = QueryBuilder.Select(SelectResult.All())
                     .From(DataSource.Database(this.param.App.database)))
             {
-                // Run the query
                 var result = query.Execute();
                 var res = result.ToArray();
                 foreach (var i in res)
@@ -117,7 +183,6 @@ namespace Einkaufsliste
             using (var query = QueryBuilder.Select(SelectResult.All())
                    .From(DataSource.Database(this.param.App.database)))
             {
-                // Run the query
                 var result = query.Execute();
                 var res = result.ToArray();
 
@@ -127,7 +192,7 @@ namespace Einkaufsliste
                     Boolean found = false;
                     foreach (var item in Items)
                     {
-                        if (item.ID.Equals(i.GetDictionary(0).GetString("id")))
+                        if (item.ID.Equals(i.GetDictionary(0).GetString("ID")))
                         {
                             item.Name = i.GetDictionary(0).GetString("name");
                             item.Value = i.GetDictionary(0).GetString("value");
@@ -139,8 +204,7 @@ namespace Einkaufsliste
 
                     if (!found)
                     {
-                        await Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
-                        () =>
+                        await Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
                         {
                             this.items.Add(new Item()
                             {
@@ -148,8 +212,7 @@ namespace Einkaufsliste
                                 Value = i.GetDictionary(0).GetString("value"),
                                 ID = i.GetDictionary(0).GetString("ID")
                             });
-                        }
-                        );
+                        });
                         
                         documents.Add(i.GetDictionary(0).GetString("ID"));
                     }
@@ -170,10 +233,12 @@ namespace Einkaufsliste
 
                     if (!found)
                     {
-                        this.Items.RemoveAt(i);
+                        await Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+                        {
+                            this.Items.RemoveAt(i);
+                        });
                     }
                 }
-
             }
         }
     }
