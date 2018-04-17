@@ -161,6 +161,7 @@ namespace Einkaufsliste
         {
             using (var mutableDoc = new MutableDocument())
             {
+                System.Diagnostics.Debug.WriteLine("ID from new doc " + mutableDoc.Id);
                 mutableDoc.SetString("name", name).SetString("value", value).SetString("ID", mutableDoc.Id);
 
                 // Save it to the database

@@ -53,7 +53,7 @@ namespace Einkaufsliste
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
-            this.param.App.AddItem("Apfel", "1");
+            this.param.App.AddItem("Banane", "1");
         }
         
         private void Button_Click_2(object sender, RoutedEventArgs e)
@@ -96,7 +96,7 @@ namespace Einkaufsliste
                 foreach (var i in res)
                 {
                     System.Diagnostics.Debug.WriteLine("Output " + Newtonsoft.Json.JsonConvert.SerializeObject(i));
-                    System.Diagnostics.Debug.WriteLine("Output " + i.GetDictionary(0).GetString("name"));
+                    System.Diagnostics.Debug.WriteLine("Output " + i.GetDictionary(0).GetString("ID"));
 
 
                     this.items.Add(new Item()
@@ -127,7 +127,7 @@ namespace Einkaufsliste
                     Boolean found = false;
                     foreach (var item in Items)
                     {
-                        if (item.ID == i.GetDictionary(0).GetString("id"))
+                        if (item.ID.Equals(i.GetDictionary(0).GetString("id")))
                         {
                             item.Name = i.GetDictionary(0).GetString("name");
                             item.Value = i.GetDictionary(0).GetString("value");
@@ -162,7 +162,7 @@ namespace Einkaufsliste
                     Boolean found = false;
                     foreach (var id in documents)
                     {
-                        if (item.ID == id)
+                        if (item.ID.Equals(id))
                         {
                             found = true;
                         }
