@@ -1,0 +1,51 @@
+%!TEX root=../prot.tex % Optional
+
+\section{Einführung}
+Diese Übung soll die möglichen Synchronisationsmechanismen bei mobilen Applikationen aufzeigen.
+
+\subsection{Ziele}
+Das Ziel dieser Übung ist eine Anbindung einer mobilen Applikation an ein Webservices zur gleichzeitigen Bearbeitung von bereitgestellten Informationen.
+
+\subsection{Voraussetzungen}
+
+\begin{itemize}
+	\item Grundlagen einer höheren Programmiersprache
+	\item Grundlagen über Synchronisation und Replikation
+	\item Grundlegendes Verständnis über Entwicklungs- und Simulationsumgebungen
+	\item Verständnis von Webservices
+\end{itemize}
+
+\subsection{Aufgabenstellung}
+
+Es ist eine mobile Anwendung zu implementieren, die einen Informationsabgleich von verschiedenen Clients ermöglicht. Dabei ist ein synchronisierter Zugriff zu realisieren. Als Beispielimplementierung soll eine "Einkaufsliste" gewählt werden. Dabei soll sichergestellt werden, dass die Information auch im Offline-Modus abgerufen werden kann, zum Beispiel durch eine lokale Client-Datenbank.
+\\\\
+Es ist freigestellt, welche mobile Implementierungsumgebung dafür gewählt wird. Wichtig ist dabei die Dokumentation der Vorgehensweise und des Designs. Es empfiehlt sich, die im Unterricht vorgestellten Methoden sowie Argumente (pros/cons) für das Design zu dokumentieren.
+
+\subsection{Bewertung}
+
+\begin{itemize}
+	\item Gruppengrösse: 1 Person
+	\item Anforderungen \textbf{"Grundkompetenz überwiegend erfüllt"}
+	\begin{itemize}
+		\item Beschreibung des Synchronisationsansatzes und Design der gewählten Architektur (Interaktion, Datenhaltung)
+		\item 	Recherche möglicher Systeme bzw. Frameworks zur Synchronisation und Replikation der Daten
+		\item Dokumentation der gewählten Schnittstellen
+	\end{itemize}
+	\item Anforderungen \textbf{"Grundkompetenz zur Gänze erfüllt"}
+	\begin{itemize}
+		\item Implementierung der gewählten Umgebung auf lokalem System
+		\item Überprüfung der funktionalen Anforderungen zur Erstellung und Synchronisation der Datensätze
+	\end{itemize}
+	\item Anforderungen \textbf{"Erweiterte-Kompetenz überwiegend erfüllt"}
+	\begin{itemize}
+		\item CRUD Implementierung
+		\item Implementierung eines Replikationsansatzes zur Konsistenzwahrung
+	\end{itemize}
+	\item Anforderungen \textbf{"Erweiterte-Kompetenz zur Gänze erfüllt"}
+	\begin{itemize}
+		\item Offline-Verfügbarkeit
+		\item System global erreichbar
+	\end{itemize}	
+\end{itemize}
+
+\clearpage
