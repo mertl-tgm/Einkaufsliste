@@ -3,47 +3,119 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:Einkaufsliste"
+    xmlns:Einkaufsliste="using:Einkaufsliste"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d">
+    mc:Ignorable="d" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
 
-    <SplitView x:Name="SplitView" DisplayMode="CompactOverlay"  IsPaneOpen="False" 
-               CompactPaneLength="50" OpenPaneLength="150">
+    <Page.Resources>
+        <DataTemplate x:Key="DefaultTemplate">
+            <Grid Width="240" Height="48">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="48" />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+            </Grid>
+        </DataTemplate>
+    </Page.Resources>
+
+    <SplitView x:Name="MySplitView" DisplayMode="CompactOverlay"  IsPaneOpen="False" ScrollViewer.VerticalScrollBarVisibility="Visible"
+               CompactPaneLength="50" OpenPaneLength="160" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <SplitView.Pane>
             <StackPanel Background="Gray">
                 <Button x:Name="HamburgerButton" FontFamily="Segoe MDL2 Assets" Content="&#xE700;"
                     Width="50" Height="50" Background="Transparent" Click="HamburgerButton_Click"/>
                 <StackPanel Orientation="Horizontal">
-                    <Button x:Name="MenuButton1" FontFamily="Segoe MDL2 Assets" Content="&#xE825;"
-                    Width="50" Height="50" Background="Transparent"/>
-                    <TextBlock Text="Button 1" FontSize="18" VerticalAlignment="Center" />
+                    <Button x:Name="MenuButton1" FontFamily="Segoe MDL2 Assets" Content="&#xE1E2;"
+                    Width="50" Height="50" Background="Transparent" Tag="MenuButton1"/>
+                    <TextBlock Text="Registrierung" FontSize="18" VerticalAlignment="Center" />
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
                     <Button x:Name="MenuButton2" FontFamily="Segoe MDL2 Assets" Content="&#xE10F;"
-                        Width="50" Height="50" Background="Transparent"/>
-                    <TextBlock Text="Button 2" FontSize="18" VerticalAlignment="Center" />
+                        Width="50" Height="50" Background="Transparent" />
+                    <TextBlock Text="Login" FontSize="18" VerticalAlignment="Center" />
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
-                    <Button x:Name="MenuButton3" FontFamily="Segoe MDL2 Assets" Content="&#xE1D6;"
-                        Width="50" Height="50" Background="Transparent"/>
-                    <TextBlock Text="Button 3" FontSize="18" VerticalAlignment="Center" />
+                    <Button x:Name="MenuButton3" FontFamily="Segoe MDL2 Assets" Content="&#xE10A;"
+                        Width="50" Height="50" Background="Transparent" />
+                    <TextBlock Text="Beenden" FontSize="18" VerticalAlignment="Center" />
                 </StackPanel>
             </StackPanel>
         </SplitView.Pane>
         <SplitView.Content>
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition/>
-                    <ColumnDefinition Width="44"/>
-                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-                <TextBlock Text="Column 1 sizes to its conent." FontSize="24" Margin="0,0,43,0"/>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="50"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="170"/>
+                </Grid.RowDefinitions>
 
-                <Button x:Name="button" Content="Test Button" HorizontalAlignment="Left" Margin="182,561,-277,47" VerticalAlignment="Center" Click="Button_Click" RenderTransformOrigin="0.5,0.5" Grid.ColumnSpan="4"/>
-                <Button Content="Add Item" Grid.ColumnSpan="4" HorizontalAlignment="Left" Margin="42,561,-107,0" VerticalAlignment="Top" Click="Button_Click_1"/>
+                <TextBlock Grid.Row="0" Grid.Column="0" Foreground="Black" FontSize="25" Text="Einkaufsliste" 
+                           Margin="10,0" Height="50" TextWrapping="Wrap" />
+
+                <ListView Grid.Row="1" Grid.Column="0" ItemsSource="{x:Bind ViewModel.Items}" SelectionChanged="ListView_OnSelectionChanged">
+                    <ListView.ItemTemplate>
+                        <DataTemplate x:DataType="Einkaufsliste:Item">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="25"/>
+                                </Grid.RowDefinitions>
+
+                                <TextBlock Grid.Column="0" Text="{x:Bind Name}"/>
+                                <TextBlock Grid.Column="1" Text="{x:Bind Value}" x:Phase="1"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+
+                <Grid x:Name="Items" Grid.Row="2" Grid.Column="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="60"/>
+                            <RowDefinition Height="60"/>
+                            <RowDefinition Height="50"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBox Grid.Row="0" Grid.Column="0" x:Name="name" Header="Name:" PlaceholderText="" Margin="10,0"/>
+                        <TextBox Grid.Row="1" Grid.Column="0" x:Name="value" Header="Einheit:" PlaceholderText="" Margin="10,0"/>
+
+                        <Grid Grid.Row="2" Grid.Column="0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="50"/>
+                            </Grid.RowDefinitions>
+
+                            <Button Grid.Row="0" Grid.Column="0" Content="Hinzufügen" Click="Button_Click_1" Margin="10,0"/>
+                            <Button Grid.Row="0" Grid.Column="1" Content="Bearbeiten" Click="Button_Click_2" Margin="10,0"/>
+                            <Button Grid.Row="0" Grid.Column="2" Content="Entfernen" Click="Button_Click_3" Margin="10,0"/>
+                        </Grid>
+                    </Grid>
+                </Grid>
 
             </Grid>
         </SplitView.Content>
     </SplitView>
+
 </Page>

@@ -18,6 +18,7 @@ using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 using System.Collections;
+using System.Collections.ObjectModel;
 
 namespace Einkaufsliste
 {
@@ -26,7 +27,6 @@ namespace Einkaufsliste
     /// </summary>
     public sealed partial class App : Application
     {
-        private Database database;
 
         /// <summary>
         /// Initialisiert das Singletonanwendungsobjekt. Dies ist die erste Zeile von erstelltem Code
@@ -36,6 +36,8 @@ namespace Einkaufsliste
         {
             this.InitializeComponent();
             this.Suspending += OnSuspending;
+
+            this.StartDBConnection();
         }
 
         /// <summary>
@@ -105,7 +107,7 @@ namespace Einkaufsliste
             deferral.Complete();
         }
 
-        public void TestDB()
+        public void StartDBConnection()
         {
             Couchbase.Lite.Support.UWP.Activate();
 
@@ -152,30 +154,25 @@ namespace Einkaufsliste
                 }
             });
 
-            this.database.AddChangeListener((sender, args) =>
-            {
-                System.Diagnostics.Debug.WriteLine("Changed local db");
-            });
-            replicator.Start();
-
-            
+            replicator.Start();     
         }
 
         public void AddItem(string name, String value)
         {
             using (var mutableDoc = new MutableDocument())
             {
-                mutableDoc.SetString("name", name).SetString("value", value);
+                mutableDoc.SetString("name", name).SetString("value", value).SetString("ID", mutableDoc.Id);
 
                 // Save it to the database
                 this.database.Save(mutableDoc);
             }
         }
+
+        public Database database { get; set; }
     }
 
     public class Param
     {
         public App App { get; set; }
-        public string Text { get; set; }
     }
 }
