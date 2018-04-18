@@ -11,3 +11,6 @@ Die App verwendet Couchbase Lite als lokale Datenbank, auf dem Server wurde ein 
 ![Couchbase Plattform](https://blog.couchbase.com/wp-content/uploads/2017/03/building-net-apps-using-couchbase-lite-4-638.jpg)
 
 
+## Usage
+
+Unter dem Release Kategorie gibt es ein ZIP-Archive, dieses beinhaltet die App für die Plattformen x86, x64 und ARM. Mittels dem enthaltenen Powershell Skript kann die App auf der gewünschten Plattform installiert werden.
