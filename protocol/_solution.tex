@@ -4,45 +4,46 @@
 
 Um eine Anwendung zu Entwickeln, welche es erlaubt, Daten zu synchronisieren und eine Offline-Verfügbarkeit mittels einer lokalen Client-Datenbank zu Verfügung zu stellen, gibt es einige unterschiedliche Ansätze.
 \\\\
-Wie bereits im Unterricht besprochen bietet diff-sync eine einfache Möglichkeit mittels NodeJS Daten zu synchronisieren. Weiters gibt es unzählige Plattformen die solche Features anbieten, unter anderem Googles Firebase. Diese erlaubt es einfach, eine App zu Entwickeln, welche die Daten mit einer Firebase Datenbank synchronisieren. \cite{firebase}
+Wie bereits im Unterricht besprochen bietet diff-sync eine einfache Möglichkeit mittels Node.js Daten zu synchronisieren. Dieses Verfahren verwendet die Differential Synchronization Methode. \cite{nodejssync} Weiters gibt es unzählige Cloud Plattformen die solche Komplettlösungen anbieten, unter anderem Googles Firebase. Diese erlaubt es einfach, eine App zu Entwickeln, welche die Daten mit einer Firebase Datenbank zwischen Clients synchronisiert. \cite{firebase}
 \\\\
-Schlussendlich wurde Couchbase als Plattform zur Umsetzung dieser Übung gewählt, da es mittels Sync Gateway und Couchbase Lite die umfangreichste und die meisten Funktion bietet. Ebenso unterstützt Couchbase sehr viele unterschiedliche Systeme und Programmiersprachen. Unter anderem auch C\# mit UWP, wobei die mit der UWP und .Net Plattform entwickelten Anwendungen mittels Xamarin auch auf Android und IOS laufen können. Da bereits einiges an Erfahrung mittels der Laborübung mit der UWP Plattform gesammelt worden ist, wurde für diese Aufgabe ebenfalls auf diese Plattform gesetzt.
+Schlussendlich wurde Couchbase als Plattform zur Umsetzung dieser Übung gewählt, da es mittels Sync Gateway und Couchbase Lite die umfangreichste Plattform ist und die meisten Funktion bietet. Ebenso unterstützt Couchbase sehr viele unterschiedliche Systeme und Programmiersprachen. Unter anderem auch C\# mit UWP, wobei die mit der UWP und .Net Plattform entwickelte Anwendung mittels Xamarin auch auf Android und IOS laufen können. Da bereits einiges an Erfahrung mittels der Laborübung mit der UWP Plattform gesammelt worden ist, wurde für diese Aufgabe ebenfalls auf diese Plattform gesetzt. \cite{couchbasemobile}
 
 \subsection{Couchbase}
 
-Zur Umsetzung solch einer Anwendung mittels Couchbase werden 3 Komponenten benötigt.
+Zur Umsetzung solch einer Anwendung mittels Couchbase werden drei Komponenten benötigt.
 
 \begin{itemize}
-	\item \textbf{Couchbase Server}: Ein NoSQL Server, welcher zentral alle Daten verwaltet.
-	\item \textbf{Sync Gateway}: Dies stellt die Schnittstelle zwischen den Server und den Clients dar. Sync Gateway bietet eine REST-Schnittstelle auf den Server zur Synchronisierung der Datensätze.
-	\item \textbf{Couchbase Lite}: Stellt die Client Datenbank zu Verfügung. Kann offline verwendet werden, sobald eine Verbindung hergestellt werden kann, werden die Datensätze mittels Sync Gateway synchronisiert.
+	\item \textbf{Couchbase Server}: Ein NoSQL Server, welcher zentral alle Daten verwaltet und die Schnittstelle zum Sync Gateway bietet.
+	\item \textbf{Sync Gateway}: Dies stellt die Schnittstelle zwischen den Server und den Clients dar. Sync Gateway bietet eine REST-Schnittstelle auf den Server zur Synchronisierung der Datensätze zugreift.
+	\item \textbf{Couchbase Lite}: Stellt die Client Datenbank zu Verfügung. Kann offline verwendet werden und sobald eine Verbindung hergestellt werden kann, werden die Datensätze mittels Sync Gateway synchronisiert.
 \end{itemize}
+
+Einer der großen Vorteile dieser Plattform ist, dass der Client selber nie mit dem Server im Hintergrund kommuniziert bzw. diese Kommunikation umgesetzt werden muss. Die App selber greift nur auf die lokale Datenbank zu und nur diese Zugriffe müssen implementiert werden, die Synchronisierung übernimmt Sync Gateway und das Abspeichern der Couchbase Server. Außerdem kümmert sich Sync Gateway um die Versionierung der Dokumente sowie um das Lösen von Konflikten bei Dokumenten. \cite{couchbaseapp}
+
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.9\linewidth]{img/building-net-apps-using-couchbase-lite-4-638}
+	\includegraphics[width=0.95\linewidth]{img/building-net-apps-using-couchbase-lite-4-638}
 	\caption{Umsetzung mittels Couchbase}
 	\label{fig:building-net-apps-using-couchbase-lite-4-638}
 \end{figure}
 
-Einer der großen Vorteile dieser Plattform ist, dass der Client selber nie mit dem Server im Hintergrund kommuniziert bzw. umgesetzt werden muss. Die App selber greift nur auf die lokale Datenbank zu und nur diese Zugriffe müssen umgesetzt werden, die Synchronisierung übernimmt Sync Gateway und das Abspeichern der Couchbase Server. Außerdem kümmert sich Sync Gateway um die Versionierung der Dokumente sowie um das Lösen von Konflikten bei Dokumenten. \cite{couchbaseapp}
-
 
 \section{Umsetzung}
 
-Zum Umsetzen dieser Übung wurde auf den Server mit der IP-Adresse 37.252.185.24 ein Couchbase Server sowie Sync Gateway installiert. Mittels Visual Studio und C\# wurde ein UWP-App entwickelt, welche Couchbase Lite als lokale Datenbank verwendet.
+Zum Umsetzen dieser Übung wurde auf den Server mit der IP-Adresse 37.252.185.24 ein Couchbase Server sowie Sync Gateway installiert. Mittels Visual Studio und C\# wurde ein UWP-App entwickelt, welche Couchbase Lite als lokale Datenbank verwendet und diese mit den Couchbase Server synchronisiert.
 
 \subsection{Couchbase Server}
 
-Zunächst wurde ein Couchbase Enterprise Server auf einen Server aufgesetzt, verwendet wurde die Version 5.1. Die Enterprise Software darf kostenlos zur Entwicklung und Testen verwendet werden, erst beim normalen Betrieb muss eine Lizenz erworben werden.
+Zunächst wurde ein Couchbase Enterprise Server auf einen Server aufgesetzt, verwendet wurde die Version 5.1. Die Enterprise Edition darf kostenlos zur Entwicklung und Testen verwendet werden, erst beim normalen Betrieb muss eine Lizenz erworben werden.
 \\\\
 Der Server mit der Datenbank ist unter der IP-Adresse 37.252.185.24 und dem Port 8091 erreichbar. Beim Aufsetzen wurde ein neuer Cluster erstellt und die RAM Zuweisung wurde verringert, ansonsten wurden alle Einstellung bei den default Werten belassen.
 \\\\
-Über diese Adresse kann nun auf das Admin Dashboard des Couchbase Servers zugegriffen werden. Über dieses wurde ein Benutzer \textit{UserEin} erstellt, welche volle Zugrissrechte auf den Bucket \textit{einkaufsliste} hat. \cite{couchbaseintro}
+Über diese Adresse kann nun auf das Admin Dashboard des Couchbase Servers zugegriffen werden. Über dieses wurde ein Benutzer \textit{UserEin} erstellt, welche volle Zugriffsrechte auf den Bucket \textit{einkaufsliste} hat. \cite{couchbaseintro}
 
 \subsection{Sync Gateway}
 
-Wie auch der Couchbase wurde nun Sync Gateway auf dem Server installiert. Auch hier muss kaum etwas konfiguriert werden, nur beim erstmaligem Starten des Services muss eine Konfigurationsdatei angegeben werden.
+Wie auch der Couchbase Server wurde nun Sync Gateway auf dem Server installiert. Verwendet wurde die Version 2.0, diese kann nur in Kombination mit den Couchbase Server ab Version 5.0 verwendet werden. Auch hier muss kaum etwas konfiguriert werden, nur beim erstmaligem Starten des Services muss eine Konfigurationsdatei angegeben werden, diese sieht wie folgt aus:
 \\\\
 \begin{minted}{json}
 	{
@@ -63,9 +64,9 @@ Wie auch der Couchbase wurde nun Sync Gateway auf dem Server installiert. Auch h
 	
 \end{minted}
 
-Diese JSON gibt den Namen der Datenbank an \textit{db}, weiters muss der Couchbase Server angegeben werden, dieser ist lokal aufrufbar. Nun wurde am Server ein Bucket mit dem Namen \textit{einkaufsliste} erstellt, dieser Name muss auch in der Konfiguration angegeben werden. Weiters muss der Benutzer sowie sein Passwort angegeben werden sein, sodass sich der Service mit den Server kommunizieren kann. Abschließend gibt eine \textit{sync} Funktion an, welche Dokumente synchronisiert werden sollen. Hierbei kann mittels Tags gearbeitet werden, sodass ein Client nur bestimmte Dokumente synchronisiert, in diesem Fall wurden alle Dokumente dem Channel \textit{liste} hinzugefügt.
+Diese JSON gibt den Namen der Datenbank an \textit{db}, weiters muss der Couchbase Server angegeben werden, dieser ist lokal mit dem Port 8091 aufrufbar. Der am Server erstellte Bucket mit dem Namen \textit{einkaufsliste} muss auch in der Konfiguration angegeben werden. Weiters muss der Benutzer sowie sein Passwort angegeben werden, sodass der Service mit dem Server kommunizieren kann. Abschließend gibt eine \textit{sync} Funktion an, welche Dokumente synchronisiert werden sollen. Hierbei kann mittels Tags gearbeitet werden, sodass ein Client nur bestimmte Dokumente synchronisiert, in diesem Fall wurden alle Dokumente dem Channel \textit{liste} hinzugefügt. \cite{couchbasechannel}
 \\\\
-Ob alles richtig funktioniert hat, kann einerseits anhand der Meldung in der Konsole überprüft werden, anderseits muss die Adresse mit dem Port 4984, bei einer erfolgreichem Konfiguration folgendes zurückliefern. 
+Ob alles richtig funktioniert hat, kann einerseits anhand der Meldung in der Konsole überprüft werden, anderseits muss die Adresse mit dem Port 4984, bei einer erfolgreichem Konfiguration, folgendes zurückliefern. 
 
 \begin{minted}{JSON}
 	{"couchdb":"Welcome","vendor":{"name":"Couchbase Sync Gateway","version":"2.0"},"version":"Couchbase Sync Gateway/2.0.0(832;2d8a6c0)"}
@@ -110,7 +111,7 @@ Zur Darstellung der Einträge wurde eine ListView verwendet, diese stellt alle O
 </ListView>
 \end{minted}
 
-Alle Informationen, welche angezeigt werden sollen, werden in den Objekt namens \textit{Item} gespeichert. Dieses Objekt beinhaltet den Namen sowie die Menge von dem Objekt. Zur eindeutigen Identifikation übernimmt das Objekt noch die ID des Couchbase Documents.
+Alle Informationen, welche angezeigt werden sollen, werden in den Objekt namens \textit{Item} gespeichert. Dieses Objekt beinhaltet den Namen sowie die Menge. Zur eindeutigen Identifikation übernimmt das Objekt noch die ID des Couchbase Documents.
 
 \begin{minted}{csharp}
 public class Item
@@ -121,19 +122,18 @@ public class Item
 }
 \end{minted}
 
-Wobei die Klasse ItemViewModel um das Verwalten der Collection von Items kümmert. In dieser Klasse werden beim Start des Programmes alle Objekte ausgelesen, sowie bei der Synchronisierung die Objekteinformationen aktualisiert, sodass die neuen Informationen angezeigt werden. \cite{listview}
+Wobei die Klasse ItemViewModel sich um das Verwalten der Collection von Items kümmert. In dieser Klasse werden beim Start des Programmes alle Objekte ausgelesen, sowie bei der Synchronisierung die Objekteinformationen aktualisiert, sodass die neuen Informationen angezeigt werden. \cite{listview}
 
 \subsubsection{Lokale Datenbank}
 
 In der App Klasse wurde die Methode \textit{StartDBConnection} erstellt, diese baut eine Verbindung zur lokalen Datenbank auf und falls möglich, wird die Synchronisierung mit dem Couchbase Server gestartet. Diese Methode wird beim Start der App aufgerufen und aktiviert als erstes den UWP Support und erstellt bzw. verbindet sich zu der Datenbank \textit{einkaufsliste}.
-
 
 \begin{minted}{csharp}
 Couchbase.Lite.Support.UWP.Activate();
 this.database = new Database("einkaufsliste");
 \end{minted}
 
-Nun muss die Konfiguration für die Replikation erstellt werden und hierfür muss ein Endpoint bestimmt werden. Als Replicator Type wurde Push und Pull gewählt. Weiters muss der Channel angegeben werden, welcher in der Sync Gateway Konfigurationsdatei festgelegt worden ist, angegeben werden. Abschließend muss noch die Authentifikation konfiguriert werden, nun kann die Replikation gestartet werden. \cite{couchbasegettingstarted}
+Nun muss die Konfiguration für die Replikation erstellt werden und hierfür muss ein Endpoint bestimmt werden. Als Replicator Type wurde Push und Pull gewählt. Weiters muss der Channel angegeben werden, welcher in der Sync Gateway Konfigurationsdatei festgelegt worden ist. Abschließend muss noch die Authentifikation konfiguriert werden, nun kann die Replikation gestartet werden. \cite{couchbasegettingstarted}
 
 \begin{minted}{csharp}
 var targetEndpoint = new URLEndpoint(new Uri("ws://37.252.185.24:4984/db"));
@@ -190,7 +190,7 @@ using (var query = QueryBuilder.Select(SelectResult.All())
 
 \subsubsection{Löschen eines Eintrages}
 
-In der ListView hat jeder Eintrag einen Löschen Button, dieser hat im DataContext die ID des Dokumentes gespeichert. Bei einem Click Event wird die Methode \textit{Button\_Click\_Delete}, diese castet den Sender zu einem Button um und holt sich aus dem DataContext die ID. Mittels dieser ID kann aus der Datenbank das Dokument gelöscht werden. \cite{uwpbutton}
+In der ListView hat jeder Eintrag einen Löschen Button, dieser hat im DataContext die ID des Dokumentes gespeichert. Bei einem Click Event wird die Methode \textit{Button\_Click\_Delete} aufgerufen, diese castet den Sender zu einem Button um und holt sich aus dem DataContext die ID. Mittels dieser ID kann aus der Datenbank das Dokument gelöscht werden. \cite{uwpbutton}
 
 \begin{minted}{csharp}
 private void Button_Click_Delete(object sender, RoutedEventArgs e)
@@ -204,7 +204,7 @@ private void Button_Click_Delete(object sender, RoutedEventArgs e)
 
 \subsubsection{Hinzufügen eines Eintrages}
 
-Wird der Button \textit{Hinzufügen} geklickt, werden die Eingaben in die Felder überprüft, falls diese leer sind, wird der Benutzer informiert, dass diese nicht leer sein dürfen. Ist dies nicht der Fall, wird ein neues Dokument erstellt. Hierfür wird ein MitabeDocument erstellt, dieses bekommt automatisch eine ID zugewiesen, das Dokument wird anschließend in die Datenbank gespeichert. \cite{couchbasegettingstarted}
+Wird der Button \textit{Hinzufügen} geklickt, werden die Eingaben in die Felder überprüft, falls diese leer sind, wird der Benutzer mittels einem PopUp informiert, dass diese nicht leer sein dürfen. Ist dies nicht der Fall, wird ein neues Dokument erstellt. Hierfür wird ein MutableDocument erstellt, dieses bekommt automatisch eine ID zugewiesen, das Dokument wird anschließend in die Datenbank gespeichert. \cite{couchbasegettingstarted}
 
 \begin{minted}{csharp}
 public void AddItem(string name, String value)
