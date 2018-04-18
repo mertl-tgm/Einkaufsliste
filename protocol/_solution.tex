@@ -25,10 +25,12 @@ Zur Umsetzung solch einer Anwendung mittels Couchbase werden 3 Komponenten benö
 	\label{fig:building-net-apps-using-couchbase-lite-4-638}
 \end{figure}
 
-Einer der großen Vorteile dieser Plattform ist, dass der Client selber nie mit dem Server im Hintergrund kommuniziert bzw. umgesetzt werden muss. Die App selber greift nur auf die lokale Datenbank zu und nur diese Zugriffe müssen umgesetzt werden, die Synchronisierung übernimmt Sync Gateway und das Abspeichern der Couchbase Server. \cite{couchbaseapp}
+Einer der großen Vorteile dieser Plattform ist, dass der Client selber nie mit dem Server im Hintergrund kommuniziert bzw. umgesetzt werden muss. Die App selber greift nur auf die lokale Datenbank zu und nur diese Zugriffe müssen umgesetzt werden, die Synchronisierung übernimmt Sync Gateway und das Abspeichern der Couchbase Server. Außerdem kümmert sich Sync Gateway um die Versionierung der Dokumente sowie um das Lösen von Konflikten bei Dokumenten. \cite{couchbaseapp}
 
 
 \section{Umsetzung}
+
+Zum Umsetzen dieser Übung wurde auf den Server mit der IP-Adresse 37.252.185.24 ein Couchbase Server sowie Sync Gateway installiert. Mittels Visual Studio und C\# wurde ein UWP-App entwickelt, welche Couchbase Lite als lokale Datenbank verwendet.
 
 \subsection{Couchbase Server}
 
@@ -75,4 +77,156 @@ Wichtig zu beachten ist, sobald Sync Gateway aufgesetzt worden ist, sollte das A
 
 Wie bereits oben erwähnt wurde bei dieser Übung auf die UWP Plattform zurückgegriffen, da bei der letzten Übung bereits einiges an Erfahrung gesammelt worden ist und die Entwicklung sowie das Testen einfacher und schneller ist, da die Anwendung auch lokal getesten werden kann und nicht in einem Emulator oder auf einem Smartphone getesten werden muss.
 \\\\
-Um C
+Um Couchbase Lite dem Projekt hinzuzufügen, muss das NuGet Package \textit{Couchbase.Lite.Enterprise} installiert werden, dies kann über den NuGet Package Manager in Visual Studio gemacht werden.
+\\\\
+Die App bietet eine einfache Benutzeroberfläche, welche alle Gegenstände in einer Liste darstellt, diese können bearbeitet oder gelöscht werden. Über zwei Eingabefelder am unteren Rand, können neue Items zur Liste hinzugefügt werden. Dafür muss nach der Eingabe der Werte auf den \textit{Hinzufügen} Button geklickt werden. Das Item wird sofort in der Liste angezeigt und nach kurzer Zeit, wenn möglich, auch synchronisiert und bei anderen Benutzern angezeigt.
+\\\\
+Um einen Eintrag zu bearbeiten, muss dieser aus der Liste ausgewählt werden. Über den \textins{Bearbeiten} Button können nun die Werte geändert werden. Mittels dem \textit{Speichern} Button können diese Änderungen gespeichert werden. Auch bei Änderungen wird der Eintrag sofort am Client angezeigt und nach kurzer Zeit bei anderen Benutzern.
+\\\\
+Um Einträge zu löschen, kann ganz einfach der \textit{X} Button bei dem entsprechendem Eintrag getätigt werden. Diese Änderung wird ebenfalls sofort synchronisiert.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.7\linewidth]{img/screenshot001}
+	\caption{Benutzeroberfläche der Einkaufsliste}
+	\label{fig:screenshot001}
+\end{figure}
+
+\subsubsection{Benutzeroberfläche}
+
+Zur Darstellung der Einträge wurde eine ListView verwendet, diese stellt alle Objekte dar, welche der ObservableCollection hinzugefügt werden. Um dies Umzusetzen, wurde ein Objekt namens \textit{Item} erstellt, dieses beinhaltet alle wichtigen Informationen und wird für die Darstellung in der Liste verwendet. \cite{listview}
+
+\begin{minted}{xml}
+<ListView x:Name="MyListView" Grid.Row="1" Grid.Column="0" ItemsSource="{x:Bind ViewModel.Items}" SelectionChanged="ListView_OnSelectionChanged" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+	<ListView.ItemTemplate>
+		<DataTemplate x:DataType="Einkaufsliste:Item">
+		<Grid>
+			<TextBlock Grid.Column="0" Text="{x:Bind Name}" Height="50" VerticalAlignment="Center" />
+			<TextBlock Grid.Column="1" Text="{x:Bind Value}" x:Phase="1" Height="50" VerticalAlignment="Center"/>
+			<Button Grid.Column="2" x:Name="delete" FontFamily="Segoe MDL2 Assets" DataContext="{x:Bind ID}" Content="&#xE10A;" Click="Button_Click_Delete" />	
+		</Grid>
+		</DataTemplate>
+	</ListView.ItemTemplate>
+</ListView>
+\end{minted}
+
+Alle Informationen, welche angezeigt werden sollen, werden in den Objekt namens \textit{Item} gespeichert. Dieses Objekt beinhaltet den Namen sowie die Menge von dem Objekt. Zur eindeutigen Identifikation übernimmt das Objekt noch die ID des Couchbase Documents.
+
+\begin{minted}{csharp}
+public class Item
+{
+	public string ID { get; set; }
+	public string Name { get; set; }
+	public string Value { get; set; }
+}
+\end{minted}
+
+Wobei die Klasse ItemViewModel um das Verwalten der Collection von Items kümmert. In dieser Klasse werden beim Start des Programmes alle Objekte ausgelesen, sowie bei der Synchronisierung die Objekteinformationen aktualisiert, sodass die neuen Informationen angezeigt werden. \cite{listview}
+
+\subsubsection{Lokale Datenbank}
+
+In der App Klasse wurde die Methode \textit{StartDBConnection} erstellt, diese baut eine Verbindung zur lokalen Datenbank auf und falls möglich, wird die Synchronisierung mit dem Couchbase Server gestartet. Diese Methode wird beim Start der App aufgerufen und aktiviert als erstes den UWP Support und erstellt bzw. verbindet sich zu der Datenbank \textit{einkaufsliste}.
+
+
+\begin{minted}{csharp}
+Couchbase.Lite.Support.UWP.Activate();
+this.database = new Database("einkaufsliste");
+\end{minted}
+
+Nun muss die Konfiguration für die Replikation erstellt werden und hierfür muss ein Endpoint bestimmt werden. Als Replicator Type wurde Push und Pull gewählt. Weiters muss der Channel angegeben werden, welcher in der Sync Gateway Konfigurationsdatei festgelegt worden ist, angegeben werden. Abschließend muss noch die Authentifikation konfiguriert werden, nun kann die Replikation gestartet werden. \cite{couchbasegettingstarted}
+
+\begin{minted}{csharp}
+var targetEndpoint = new URLEndpoint(new Uri("ws://37.252.185.24:4984/db"));
+var replConfig = new ReplicatorConfiguration(this.database, targetEndpoint)
+{
+	ReplicatorType = ReplicatorType.PushAndPull
+};
+replConfig.Channels = new List<String>();
+replConfig.Channels.Add("liste");
+replConfig.Continuous = true;
+
+replConfig.Authenticator = new BasicAuthenticator("UserEin", "Einkaufsliste");
+
+var replicator = new Replicator(replConfig);
+replicator.Start(); 
+\end{minted}
+
+Nun kann in der MainPage die Verbindung zur lokalen Datenbank verwendet werden, um CRUD Operationen durchzuführen.
+
+\subsubsection{Synchronisierung}
+
+Nun wird die lokale Datenbank mit dem Server synchronisiert, um auf die Änderungen der lokalen Datenbank zu reagieren, welche durch die Synchronisierung durchgeführt werden, muss ein Change Listner auf die Datenbank gelegt werden. Dieser wird immer ausgelöst, wenn eine Änderung an der Datenbank durchgeführt wird. Dieser Listner ruft die Methode \textit{UpdateAll} auf, diese liest alle Dokumente aus der Datenbank aus und aktualisiert die \textit{Items} Objekte für die Darstellung.
+
+\begin{minted}{csharp}
+this.param.App.database.AddChangeListener((sender, args) =>
+{
+	this.ViewModel.UpdateAll();
+});
+\end{minted}
+
+In dieser Methode wird mittels einem QueryBuilder eine Query erstellt, welche alle Dokumente aus der Datenbank ausliest. Die Ergebnisse können zu einer Liste gecastet werden. Mittels dem enthaltenem Dictionary kann auf die Werte der Dokumente zugegriffen werden. \cite{couchbasegettingstarted}
+
+\begin{minted}{csharp}
+using (var query = QueryBuilder.Select(SelectResult.All())
+.From(DataSource.Database(this.param.App.database)))
+{
+	var result = query.Execute();
+	var res = result.ToArray();
+	
+	var documents = new List<string>();
+	foreach (var i in res)
+	{
+		foreach (var item in Items)
+		{
+			item.Name = i.GetDictionary(0).GetString("name");
+			item.Value = i.GetDictionary(0).GetString("value");
+			documents.Add(item.ID);
+			found = true;
+			break;
+		}
+	}
+}
+\end{minted}
+
+\subsubsection{Löschen eines Eintrages}
+
+In der ListView hat jeder Eintrag einen Löschen Button, dieser hat im DataContext die ID des Dokumentes gespeichert. Bei einem Click Event wird die Methode \textit{Button\_Click\_Delete}, diese castet den Sender zu einem Button um und holt sich aus dem DataContext die ID. Mittels dieser ID kann aus der Datenbank das Dokument gelöscht werden. \cite{uwpbutton}
+
+\begin{minted}{csharp}
+private void Button_Click_Delete(object sender, RoutedEventArgs e)
+{
+	Windows.UI.Xaml.Controls.Button button = (Windows.UI.Xaml.Controls.Button)sender;
+	Document doc = this.param.App.database.GetDocument((string) button.DataContext);
+	this.param.App.database.Delete(doc);
+	
+}
+\end{minted}
+
+\subsubsection{Hinzufügen eines Eintrages}
+
+Wird der Button \textit{Hinzufügen} geklickt, werden die Eingaben in die Felder überprüft, falls diese leer sind, wird der Benutzer informiert, dass diese nicht leer sein dürfen. Ist dies nicht der Fall, wird ein neues Dokument erstellt. Hierfür wird ein MitabeDocument erstellt, dieses bekommt automatisch eine ID zugewiesen, das Dokument wird anschließend in die Datenbank gespeichert. \cite{couchbasegettingstarted}
+
+\begin{minted}{csharp}
+public void AddItem(string name, String value)
+{
+	using (var mutableDoc = new MutableDocument())
+	{
+		mutableDoc.SetString("name", name).SetString("value", value).SetString("ID", mutableDoc.Id);
+		this.database.Save(mutableDoc);
+	}
+}
+\end{minted}
+
+\subsubsection{Update eines Eintrages}
+
+Wenn der Benutzer einen Eintrag bearbeitet, werden die Werte in die Eingabefelder geschrieben, diese kann der Benutzer bearbeiten. Klickt der Benutzer anschließend auf den \textit{Speichern} Button, wird das Dokument mit der ID aus der Datenbank ausgelesen, die Werte aktualisiert und wieder in die Datenbank abgespeichert. \cite{couchbasegettingstarted}
+
+\begin{minted}{csharp}
+using (var doc = this.param.App.database.GetDocument(this.id))
+using (var mutableDoc = doc.ToMutable())
+{
+	mutableDoc.SetString("name", this.name.Text);
+	mutableDoc.SetString("value", this.value.Text);
+	this.param.App.database.Save(mutableDoc);
+}
+\end{minted}

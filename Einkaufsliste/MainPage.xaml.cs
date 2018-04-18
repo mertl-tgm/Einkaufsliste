@@ -3,19 +3,12 @@ using Couchbase.Lite.Query;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
 using Windows.UI.Core;
 using Windows.UI.Popups;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
-using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 
 // Die Elementvorlage "Leere Seite" wird unter https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x407 dokumentiert.
@@ -132,7 +125,6 @@ namespace Einkaufsliste
             if (button.DataContext == null) return;
             Document doc = this.param.App.database.GetDocument((string) button.DataContext);
             this.param.App.database.Delete(doc);
-            
         }
 
         private void ListView_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
