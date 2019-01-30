@@ -1,6 +1,6 @@
 # Einkaufsliste
 
-Eine genauere Dokumentation ist im Verzeichnis protocol zu finden.
+Eine genauere Dokumentation ist im Verzeichnis `protocol` zu finden.
 
 ## Funktion
 
