@@ -1,6 +1,10 @@
 # Einkaufsliste
 
-Genauere Dokumentation ist im Protokoll im Verzeichnis protocol zu finden.
+Eine genauere Dokumentation ist im Verzeichnis protocol zu finden.
+
+## Funktion
+
+Es handelt sich um eine einfache UWP-App, welche es ermöglicht eine Einkaufsliste über mehrere Geräte synchron zu halten.
 
 ## Plattform
 
